@@ -13,7 +13,7 @@ from database import (
 )
 from keyboards import main, cancel_keyboard, get_duration_keyboard, get_channels_keyboard, get_subscribe_keyboard
 from states import CreateAdStates, AddChannelStates
-from utils import parse_datetime, format_datetime, MOSCOW_TZ
+from utils import parse_datetime_moscow, format_datetime_utc_to_moscow, UTC
 
 router = Router()
 
@@ -151,7 +151,7 @@ async def process_channel_selection(callback: CallbackQuery, state: FSMContext):
 
 @router.message(CreateAdStates.content, F.text | F.photo | F.video | F.document)
 async def process_content(message: Message, state: FSMContext):
-    if message.text and message.text.strip() == 'Отмена':
+    if message.text and message.text == 'Отмена':
         await state.clear()
         await message.answer('Создание рекламы отменено.', reply_markup=main)
         return
@@ -186,17 +186,17 @@ async def process_content(message: Message, state: FSMContext):
 
 @router.message(CreateAdStates.scheduled_time, F.text)
 async def process_scheduled_time(message: Message, state: FSMContext):
-    if message.text.strip() == 'Отмена':
+    if message.text == 'Отмена':
         await state.clear()
         await message.answer('Создание рекламы отменено.', reply_markup=main)
         return
 
-    dt = parse_datetime(message.text)
+    dt = parse_datetime_moscow(message.text)
     if not dt:
         await message.answer('❌ Неверный формат. Используйте ДД.ММ.ГГГГ ЧЧ:ММ (например, 01.01.2025 15:30)')
         return
 
-    if dt < datetime.now(MOSCOW_TZ):
+    if dt < datetime.now(UTC):
         await message.answer('❌ Время публикации не может быть в прошлом. Пожалуйста, укажите будущее время.')
         return
 
@@ -222,7 +222,7 @@ async def process_duration_callback(callback: CallbackQuery, state: FSMContext):
 
 @router.message(CreateAdStates.duration, F.text)
 async def process_duration_text(message: Message, state: FSMContext):
-    if message.text.strip() == 'Отмена':
+    if message.text == 'Отмена':
         await state.clear()
         await message.answer('Создание рекламы отменено.', reply_markup=main)
         return
@@ -253,7 +253,7 @@ async def finish_ad_creation(message: Message, state: FSMContext, duration_hours
     await state.clear()
     await message.answer(
         f'✅ Реклама запланирована!\n'
-        f'🕒 Дата публикации: {format_datetime(scheduled_at)}\n'
+        f'🕒 Дата публикации: {format_datetime_utc_to_moscow(scheduled_at)}\n'
         f'⏱️ Длительность показа: {duration_hours} часов',
         reply_markup=main
     )
@@ -326,7 +326,7 @@ async def scheduler(bot: Bot):
                     chat_id=real_channel_id,
                     text=text_content
                 )
-            await update_post_sent(post_id, sent_message.message_id, datetime.now(MOSCOW_TZ))
+            await update_post_sent(post_id, sent_message.message_id, datetime.now(UTC))
 
         to_delete = await get_sent_posts_to_delete()
         for post in to_delete:
