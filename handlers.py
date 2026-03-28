@@ -1,10 +1,9 @@
 import asyncio
 from datetime import datetime
 from aiogram import Router, F, Bot
-from aiogram.filters import Command, StateFilter
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery, ReplyKeyboardRemove
-from aiogram.exceptions import TelegramForbiddenError
+from aiogram.types import Message, CallbackQuery
 
 from config import REQUIRED_CHANNEL
 from database import (
@@ -152,6 +151,11 @@ async def process_channel_selection(callback: CallbackQuery, state: FSMContext):
 
 @router.message(CreateAdStates.content, F.text | F.photo | F.video | F.document)
 async def process_content(message: Message, state: FSMContext):
+    if message.text and message.text.strip() == 'Отмена':
+        await state.clear()
+        await message.answer('Создание рекламы отменено.', reply_markup=main)
+        return
+
     data = {}
     if message.text:
         data['text_content'] = message.text
@@ -182,6 +186,11 @@ async def process_content(message: Message, state: FSMContext):
 
 @router.message(CreateAdStates.scheduled_time, F.text)
 async def process_scheduled_time(message: Message, state: FSMContext):
+    if message.text.strip() == 'Отмена':
+        await state.clear()
+        await message.answer('Создание рекламы отменено.', reply_markup=main)
+        return
+
     dt = parse_datetime(message.text)
     if not dt:
         await message.answer('❌ Неверный формат. Используйте ДД.ММ.ГГГГ ЧЧ:ММ (например, 01.01.2025 15:30)')
@@ -213,7 +222,7 @@ async def process_duration_callback(callback: CallbackQuery, state: FSMContext):
 
 @router.message(CreateAdStates.duration, F.text)
 async def process_duration_text(message: Message, state: FSMContext):
-    if message.text == 'Отмена':
+    if message.text.strip() == 'Отмена':
         await state.clear()
         await message.answer('Создание рекламы отменено.', reply_markup=main)
         return
