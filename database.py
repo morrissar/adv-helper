@@ -12,7 +12,6 @@ async def init_db():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
-        
         await db.execute('''
             CREATE TABLE IF NOT EXISTS channels (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,7 +22,6 @@ async def init_db():
                 FOREIGN KEY (owner_id) REFERENCES users(user_id) ON DELETE CASCADE
             )
         ''')
-        
         await db.execute('''
             CREATE TABLE IF NOT EXISTS posts (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,7 +30,7 @@ async def init_db():
                 media_type TEXT,
                 media_file_id TEXT,
                 caption TEXT,
-                status TEXT DEFAULT 'pending',    -- 'pending', 'sent', 'deleted'
+                status TEXT DEFAULT 'pending',
                 scheduled_at TIMESTAMP,
                 duration_hours INTEGER,
                 sent_at TIMESTAMP,
@@ -134,4 +132,3 @@ async def get_user_stats(user_id: int):
             posts_count = (await cursor.fetchone())[0]
         channels = await get_user_channels(user_id)
         return posts_count, channels
-
