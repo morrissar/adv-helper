@@ -278,8 +278,7 @@ async def profile_handler(message: Message):
 @router.message(F.text == 'Поддержка')
 async def support_handler(message: Message):
     await message.answer(
-        '👨‍💻 По всем вопросам обращайтесь к разработчику: @developer_username\n'
-        'Или пишите на почту: support@example.com'
+        '👨‍💻 По всем вопросам обращайтесь к разработчику: @morisar_official'
     )
 
 async def scheduler(bot: Bot):
