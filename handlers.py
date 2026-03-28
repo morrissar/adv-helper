@@ -69,8 +69,7 @@ async def add_channel_start(message: Message, state: FSMContext):
         return
     await state.set_state(AddChannelStates.waiting_for_channel)
     await message.answer(
-        '📢 Отправьте мне username канала (например, @my_channel) или его ID (число).\n'
-        'Для отмены нажмите /cancel',
+        '📢 Отправьте мне username канала (например, @my_channel) или его ID (число).',
         reply_markup=cancel_keyboard
     )
 
