@@ -5,4 +5,4 @@ load_dotenv()
 
 TOKEN = os.getenv('TOKEN')
 REQUIRED_CHANNEL = '@advhelper'
-TIMEZONE = 'Europe/Moscow'  
+TIMEZONE = 'Europe/Moscow'
